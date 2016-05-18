@@ -717,7 +717,7 @@ export function profileUpdate(req, res){
     .findById(req.user.id)
     .then(user => {
       return user.update(userProfile).then(userPro => {
-        const response = _.pick(userPro,['id'])
+        const response = _.pick(userPro,['id']);
         response.message = 'Success';
         return res.json(response);
       })
@@ -729,12 +729,12 @@ export function profileUpdate(req, res){
 export function companyUpdate(req, res){
   const companyData = _.pick(req.body, [
     'name', 'corp_address', 'entity_type_id', 'description', 'short_description', 'min_emp',
-    'max_emp', 'website', 'logo_id', 'cin_id', 'llp_id',
+    'max_emp', 'website', 'logo_id', 'cin_id', 'llp_id'
   ]);
 
   const logoData = {
     logo: new Buffer(req.body.logo.base64, 'base64'),
-    mime: req.body.logo.filetype,
+    mime: req.body.logo.filetype
   };
 
   Client

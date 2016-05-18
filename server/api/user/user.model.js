@@ -23,6 +23,26 @@ export default function (sequelize, DataTypes) {
       },
       allowNull: false,
     },
+    firstname: {
+      type: DataTypes.STRING(50),
+      validate: {
+        len: {
+          args: [0, 50],
+          msg: 'Maximum length for username field is 50'
+        }
+      },
+      allowNull: false
+    },
+    lastname: {
+      type: DataTypes.STRING(50),
+      validate: {
+        len: {
+          args: [0, 50],
+          msg: 'Maximum length for username field is 50'
+        }
+      },
+      allowNull: false
+    },
     username: {
       type: DataTypes.STRING(32),
       validate: {
