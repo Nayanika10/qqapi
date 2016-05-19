@@ -162,6 +162,7 @@ export default function (sequelize, DataTypes) {
         });
 
         ApplicantState.belongsTo(models.JobScore);
+        ApplicantState.hasMany(models.InterviewFollowUp);
       },
       updateState(models, argApplicantState, LoggedInUserId) {
         const applicantState = argApplicantState;

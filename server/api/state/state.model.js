@@ -111,6 +111,7 @@ export default function (sequelize, DataTypes) {
           as: 'Childs',
           foreignKey: 'parent_id',
         });
+        State.hasMany(models.FollowUpOption);
       },
     },
   });

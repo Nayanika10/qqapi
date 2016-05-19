@@ -78,6 +78,8 @@ db.Agreement = db.sequelizeQuarc.import('../api/agreement/agreement.model');
 db.ApplicantPreferenceTime = db.sequelizeQuarc.import('../api/applicantPreferenceTime/applicantPreferenceTime.model');
 db.ApplicantScreening = db.sequelizeQuarc.import('../api/applicantScreening/applicantScreening.model');
 db.ScreeningState = db.sequelizeQuarc.import('../api/screeningState/screeningState.model');
+db.FollowUpOption = db.sequelizeQuarc.import('../api/followUpOption/followUpOption.model');
+db.InterviewFollowUp = db.sequelizeQuarc.import('../api/interviewFollowUp/interviewFollowUp.model');
 
 db.AccessToken = db.sequelizeQuantum.import('../api/accessToken/accessToken.model');
 db.App = db.sequelizeQuantum.import('../api/app/app.model');
@@ -102,6 +104,7 @@ db.Skill = db.sequelizeQuantum.import('../api/skill/skill.model');
 db.User = db.sequelizeQuantum.import('../api/user/user.model');
 db.UserTawktoToken = db.sequelizeQuantum.import('../api/userTawktoToken/userTawktoToken.model');
 db.EntityType = db.sequelizeQuantum.import('../api/entityType/entityType.model');
+
 
 // Dashboard App
 db.bdQuery = db.sequelizeQuarc.import('../applications/dashboard/api/bdQuery/bdQuery.model');
