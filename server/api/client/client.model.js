@@ -410,6 +410,11 @@ module.exports = function ClientModel(sequelize, DataTypes) {
         Client.hasMany(models.ClientPreferredFunction);
         Client.hasMany(models.ClientPreferredIndustry);
         Client.hasMany(models.Follower);
+        Client.belongsTo(models.User, {
+          as: 'EngagementManager',
+          foreignKey: 'eng_mgr_id',
+          constraints: false,
+        });
 
         Client.belongsTo(models.Group, {
           foreignKey: 'group_id',

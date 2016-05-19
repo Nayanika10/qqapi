@@ -1,7 +1,9 @@
 
+import _ from 'lodash';
 import phpSerialize from './../../components/php-serialize';
 import config from './../../config/environment';
 import logger from './../../components/logger';
+import solrSchema from './../../config/solrSchema';
 
 export default function (sequelize, DataTypes) {
   const ApplicantState = sequelize.define('ApplicantState', {
@@ -176,6 +178,61 @@ export default function (sequelize, DataTypes) {
 
           return models.Applicant.findById(applicantState.applicant_id)
             .then(applicant => applicant.update(appl));
+        });
+      },
+
+      /**
+       * Realtime Solr Index update on state change of applicant
+       * @param  {Object} solr                      Solr server instance
+       * @param  {Object} update                    Required data to be updated
+       * @param  {Number} update.job.id             Job ID
+       * @param  {Number} update.applicant.id       Applicant ID
+       * @param  {Object} update.state              State Update Object
+       * @param  {Object} update.state.state_id     State ID
+       * @param  {Object} update.state.state_name   State name
+       * @param  {Object} update.state.comment      State comment
+       * @param  {Object} update.state.scheduled_on Interview time
+       * @return {Error}        Error if failed
+       */
+      updateSolr: function updateSolr(solr, update) {
+        // Please Test fully before editing this function
+        const bq = {};
+        bq[`id:${update.applicant.id}`] = 2000;
+        const solrQuery = solr.createQuery()
+          .q(`_root_:${update.job.id}`)
+          .defType('edismax')
+          .bq(bq)
+
+          // It must be synched with solr schema configuration
+          // Avoid geting copy fields and include all other fields
+          .fl(solrSchema)
+          .sort({
+            type_s: 'DESC',
+            score: 'DESC',
+          })
+          .rows(800);
+        solr.get('select', solrQuery, (err, res) => {
+          if (err) return logger.error('State change solr getDoc Error', err);
+
+          const childs = res.response.docs;
+          const parent = childs.splice(0, 1)[0];
+          if (!parent) return logger.error('changeState: Failed to get Job', err);
+
+          childs[0].state_id = update.state.state_id;
+          childs[0].state_name = update.state.state_name;
+          childs[0].latest_comment = update.state.comment;
+          childs[0].updated_on = update.state.updated_on;
+
+          // overwrite interview fields
+          if (~[5, 8, 17].indexOf(update.state.state_id)) {
+            childs[0].interview_time = update.state.scheduled_on;
+            childs[0].interview_type = update.state.state_id;
+          }
+
+          return solr.add(_.assign(parent, { _childDocuments_: childs }), e => {
+            if (e) return logger.error('State change solr updateDocs Error', e);
+            return solr.softCommit();
+          });
         });
       },
     },

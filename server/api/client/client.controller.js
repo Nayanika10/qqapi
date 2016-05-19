@@ -304,7 +304,24 @@ export function actionCounts(req, res) {
         countData.push(widgetItem);
       });
 
-      res.json(countData);
+      const items = [
+        { id: '6', name: 'Screening Hold', count: 0 },
+        { id: '22', name: 'Scheduling Attempted', count: 0 },
+        { id: '32', name: 'Screening Attempted', count: 0 },
+        { id: '33', name: 'Awaiting Candidate Input', count: 0 },
+      ];
+      items.map(item => {
+        countData.map(wItem => {
+          console.log(item.id, wItem.id, typeof item.id, typeof wItem.id)
+          if (item.id === wItem.id) {
+            item.count = wItem.count;
+          }
+          return wItem;
+        });
+        return item;
+      })
+
+      res.json(items);
     })
     .catch(err => handleError(res, 500, err));
 }
@@ -621,7 +638,7 @@ export function billing(req, res) {
   Client
     .find({
       where: {
-        id: req.user.client_id
+        id: req.user.client_id,
       },
       attributes: ['id',
         'company_reg_name',
@@ -640,20 +657,20 @@ export function billing(req, res) {
         'service_tax_reg_number',
         'msmed_enabled',
         'msmed_number',
-        'org_size'
-      ]
+        'org_size',
+      ],
     })
     .then(client => {
       return res.json(client);
     })
     .catch(err => handleError(res, 500, err));
 }
-var img;
+
 export function company(req, res) {
   Client
     .find({
       where: {
-        id: req.user.client_id
+        id: req.user.client_id,
       },
       attributes: ['id',
         'name',

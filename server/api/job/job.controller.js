@@ -461,7 +461,34 @@ export function show(req, res) {
     } else {
       promise = Promise.resolve(job);
     }
-    return Promise.all([promise]).then(prRe => res.json(prRe[0]))
+
+    const options = {
+      attributes: ['id'],
+      where: {
+        user_id: req.user.id, // consultant_id
+        job_id: req.params.jobId,
+        status: 1,
+      },
+      include: [{
+        model: db.ConsultantResponse,
+        attributes: ['id', 'response_id'],
+        required: false,
+        where: {
+          user_id: req.user.id, // consultant_id
+        },
+      }],
+    };
+
+    return Promise.all([
+      promise,
+      db.JobAllocation.find(options),
+    ]).spread((gotJob, jobAlloc) => {
+      const response = _.assign(
+        { consultantAccepted: jobAlloc ? (jobAlloc.ConsultantResponse ? jobAlloc.ConsultantResponse.response_id === 1:false) : false },
+        { allocationId: jobAlloc ? jobAlloc.id : false }
+        , gotJob)
+      return res.json(response);
+    })
       .catch(rErr => handleError(res, 500, rErr));
   });
 }
@@ -480,7 +507,7 @@ export function consultantResponse(req, res) {
   // 3 -> Rejected
   const consultantResponse1 = {
     job_id: req.params.jobId,
-    user_id: req.user.id,
+    user_id: req.user.id, // need to handle
     response_id: req.body.responseId,
   };
 
