@@ -28,7 +28,7 @@ export default function (sequelize, DataTypes) {
       validate: {
         len: {
           args: [0, 50],
-          msg: 'Maximum length for username field is 50'
+          msg: 'Maximum length for firstname field is 50'
         }
       },
       allowNull: false
@@ -38,7 +38,7 @@ export default function (sequelize, DataTypes) {
       validate: {
         len: {
           args: [0, 50],
-          msg: 'Maximum length for username field is 50'
+          msg: 'Maximum length for lastname field is 50'
         }
       },
       allowNull: false
@@ -96,6 +96,16 @@ export default function (sequelize, DataTypes) {
         len: {
           args: [0, 64],
           msg: 'Maximum length for email_id field is 64',
+        },
+      },
+      allowNull: false,
+    },
+    website: {
+      type: DataTypes.STRING(50),
+      validate: {
+        len: {
+          args: [0, 50],
+          msg: 'Maximum length for website field is 50',
         },
       },
       allowNull: false,

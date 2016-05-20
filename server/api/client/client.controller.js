@@ -712,7 +712,7 @@ export function profile(req, res) {
 }
 
 export function profileUpdate(req, res){
-  const userProfile = _.pick(req.body, ['id','number','email_id']);
+  const userProfile = _.pick(req.body, ['id','firstname', 'lastname', 'name', 'number','email_id']);
   User
     .findById(req.user.id)
     .then(user => {
