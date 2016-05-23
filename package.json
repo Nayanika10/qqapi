@@ -26,7 +26,7 @@
     "morgan": "~1.6.1",
     "mysql": "^2.10.2",
     "oauth2-server": "yogesum/node-oauth2-server",
-    "oauth2-server2": "manjeshpv/node-oauth2-server",
+    "oauth2-server2": "manjeshpv/oauth2-server2",
     "request": "^2.69.0",
     "sequelize": "^3.5.1",
     "serve-favicon": "^2.3.0",

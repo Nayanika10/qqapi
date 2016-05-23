@@ -807,9 +807,8 @@ export default function (sequelize, DataTypes) {
                     Client: ${plainApplicant.JobApplications[0].Job.User.name}<br>
                     Position: ${plainApplicant.JobApplications[0].Job.role}<br>
                     You can manage the applicants here
-                    <a href="https://app.quezx.com/Applicants/view/
-                    ${(config.URLS.QUARC_UI_PARTNER || 'https://partner.quezx.com')}applicants/
-                    ${id}"> View Aplicant</a>`;
+                    <a href="https://app.quezx.com/Applicants/view/applicants/${id}">
+                    View Aplicant</a>`;
 
                     const emailInternals = {
                       settings: {
