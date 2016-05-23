@@ -675,16 +675,25 @@ export function company(req, res) {
     })
     .then(clientData => {
       const client = clientData.toJSON();
+      let emp_range = client.min_emp+'-'+client.max_emp;
       let logo = new Buffer(client.Logo.logo).toString('base64');
       client.logo = {
         base64: logo,
         filetype: client.Logo.mime
       };
-      img = logo
+      client.emp_range = emp_range;
+      img = logo;
       delete client.Logo;
+      delete client.min_emp;
+      delete client.max_emp;
       return res.json(client);
     })
     .catch(err => handleError(res, 500, err));
+}
+
+export function getEmpRange(req, res) {
+  let emp_range = ['1-1','2-10','11-50','51-200','201-500','501-1000','1001-5000','5001-10000','10000-1000000'];
+      return res.json(emp_range);
 }
 
 export function profile(req, res) {
@@ -717,7 +726,7 @@ export function profileUpdate(req, res){
     .findById(req.user.id)
     .then(user => {
       return user.update(userProfile).then(userPro => {
-        const response = _.pick(userPro,['id']);
+        const response = _.pick(userPro,['id'])
         response.message = 'Success';
         return res.json(response);
       })
@@ -728,9 +737,15 @@ export function profileUpdate(req, res){
 
 export function companyUpdate(req, res){
   const companyData = _.pick(req.body, [
-    'name', 'corp_address', 'entity_type_id', 'description', 'short_description', 'min_emp',
-    'max_emp', 'website', 'logo_id', 'cin_id', 'llp_id'
+    'name', 'corp_address', 'entity_type_id', 'description' , 'min_emp',
+    'max_emp', 'website', 'logo_id', 'cin_id', 'llp_id', 'emp_range'
   ]);
+
+  const min_emp = companyData.emp_range.split('-')[0];
+  const max_emp = companyData.emp_range.split('-')[1];
+  companyData.min_emp = min_emp;
+  companyData.max_emp = max_emp;
+  delete companyData.emp_range;
 
   const logoData = {
     logo: new Buffer(req.body.logo.base64, 'base64'),

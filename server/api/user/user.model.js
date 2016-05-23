@@ -100,16 +100,6 @@ export default function (sequelize, DataTypes) {
       },
       allowNull: false,
     },
-    website: {
-      type: DataTypes.STRING(50),
-      validate: {
-        len: {
-          args: [0, 50],
-          msg: 'Maximum length for website field is 50',
-        },
-      },
-      allowNull: false,
-    },
     consultant_id: {
       type: DataTypes.INTEGER(11),
       validate: {

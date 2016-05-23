@@ -158,8 +158,8 @@ module.exports = function ClientModel(sequelize, DataTypes) {
         len: {
           args: [0, 500],
           msg: 'Maximum length for website field is 500',
-        },
-      },
+        }
+      }
     },
     apple_store_link: {
       type: DataTypes.STRING(500),

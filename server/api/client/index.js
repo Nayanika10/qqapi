@@ -10,6 +10,7 @@ router.get('/preferences', controller.preferences);
 router.get('/billing', controller.billing);
 router.post('/billing', controller.billingUpdate);
 router.get('/company', controller.company);
+router.get('/getEmpRange', controller.getEmpRange);
 router.post('/company', controller.companyUpdate);
 router.get('/profile', controller.profile);
 router.post('/profile', controller.profileUpdate);
