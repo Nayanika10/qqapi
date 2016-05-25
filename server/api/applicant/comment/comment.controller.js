@@ -35,7 +35,19 @@ export function index(req, res) {
         order: [['id', 'DESC']],
         where: {
           applicant_id: req.params.applicantId,
+          state_id: BUCKETS[STAKEHOLDERS[req.user.group_id]].ALL,
         },
+        include: [{
+          model: db.InterviewFollowUp,
+          include: {
+            model: db.FollowUpOption
+          }
+        },{
+          model: db.State,
+          include: [{
+            model: db.FollowUpOption
+          }]
+        }]
       });
       Promise.all([commentsPromise, stateCommentsPromise])
         .then(val => {

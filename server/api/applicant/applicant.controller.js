@@ -264,7 +264,7 @@ export function downloadResume(req, res) {
       };
       if (req.query.concat === 'true') {
         file.path = `${file.path
-          .substring(0, file.path.lastIndexOf('/') + 1)}} concat.pdf`;
+          .substring(0, file.path.lastIndexOf('/') + 1)}-concat.pdf`;
         file.name += '_concat';
       }
 

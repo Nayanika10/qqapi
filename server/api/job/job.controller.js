@@ -385,21 +385,41 @@ export function allocationStatusNew(req, res) {
 
 // List Jobs allocationed to consultant
 export function allocationStatusNewCount(req, res) {
-  return JobAllocation.count({
-    where: { consultant_response_id: null, user_id: req.user.id },
-    include: [{ model: db.Job, where: { status: 1 } }],
-  })
-    .then(count => res.json({ count })).catch(err => handleError(res, 500, err));
+  const countQuery = `
+            SELECT response_id ,count(response_id) AS count FROM (SELECT
+                  Job.id ,
+                COALESCE(ConsultantResponse.response_id,0) AS response_id
+              FROM gloryque_quarc.job_allocations AS JobAllocation
+              LEFT JOIN gloryque_quarc.jobs AS Job
+                  ON (JobAllocation.job_id = Job.id AND Job.status = '1')
+                LEFT JOIN gloryque_quarc.consultant_responses AS ConsultantResponse
+                  ON (JobAllocation.consultant_response_id = ConsultantResponse.id)
+                LEFT JOIN gloryque_quantum.users AS User
+                  ON (Job.user_id = User.id)
+                LEFT JOIN gloryque_quantum.clients AS Client
+                  ON ( Client.id = User.client_id)
+              WHERE JobAllocation.user_id = ${req.user.id} AND Job.status = '1'
+              AND JobAllocation.status = '1'
+              GROUP BY JobAllocation.job_id) AS TEMP
+            GROUP BY  response_id`;
+
+  return sequelizeQuarc
+    .query(countQuery, { type: Sequelize.QueryTypes.SELECT })
+    .then(countResult => {
+      const jobCountObject = cakeList(countResult, 'response_id', 'count');
+      return res.json({count:jobCountObject[0] || 0})
+    }).catch(err => handleError(res, 500, err));
 }
 
 // Gets a single Job from the DB
 export function show(req, res) {
   const fl = req.query.fl || [
-    'id', 'role', 'owner_id', 'max_sal', 'min_sal', 'job_code', 'min_exp', 'max_exp',
-    'client_name', 'job_status', 'job_status_id', 'required_skills', 'optional_skills',
-    'interview_addr', 'interview_place_direction', 'days_per_week', 'job_location',
-    'end_work_time', 'start_work_time', 'degrees', 'institutes', '_root_', 'vacancy',
-    'employers', 'industries', 'perks', 'preferred_genders', 'responsibility',
+      'id', 'role', 'owner_id', 'max_sal', 'min_sal', 'job_code', 'min_exp', 'max_exp',
+      'client_name', 'job_status', 'job_status_id', 'required_skills', 'optional_skills',
+      'interview_addr', 'interview_place_direction', 'days_per_week', 'job_location',
+      'end_work_time', 'start_work_time', 'degrees', 'institutes', '_root_', 'vacancy',
+      'employers', 'industries', 'perks', 'preferred_genders', 'responsibility', 'comments',
+      'functional_area', 'job_nature',
   ].join(',');
 
   const solrQuery = db.Solr
@@ -484,7 +504,7 @@ export function show(req, res) {
       db.JobAllocation.find(options),
     ]).spread((gotJob, jobAlloc) => {
       const response = _.assign(
-        { consultantAccepted: jobAlloc ? (jobAlloc.ConsultantResponse ? jobAlloc.ConsultantResponse.response_id === 1:false) : false },
+        { consultantResponse: jobAlloc ? (jobAlloc.ConsultantResponse ? jobAlloc.ConsultantResponse.response_id : 0) : false },
         { allocationId: jobAlloc ? jobAlloc.id : false }
         , gotJob)
       return res.json(response);
@@ -513,14 +533,12 @@ export function consultantResponse(req, res) {
 
   ConsultantResponse.create(consultantResponse1)
     .then(savedConsultantResponse => {
-      const genereatedResponseId = savedConsultantResponse.id;
       return JobAllocation.find({
         where: {
-          job_id: req.params.jobId,
-          user_id: req.user.id,
+          id: req.body.allocationId,
         },
       })
-        .then(jA => jA.update({ consultant_response_id: genereatedResponseId })
+        .then(jA => jA.update({ consultant_response_id: savedConsultantResponse.id })
         .then(uJA => res.json(_.pick(uJA, ['id']))));
     }).catch(err => handleError(res, 500, err));
 }

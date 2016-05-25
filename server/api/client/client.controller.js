@@ -94,21 +94,47 @@ export function makeUserActive(req, res) {
           });
           const task = {
             jobType: 'Email',
-            group: 'low',
+            group: 'high',
             data: queueData,
           };
           // Creating entry in queued task Ends here
           QueuedTask.create(task)
             .catch(qErr => logger.error(`error queue email: user signup: ${req.user.id}`,
               qErr, queueData));
+
           // Updating user is_active flag and setting it to 1
           return User.find({
             where: {
               id: req.user.id,
             },
-          }).then(quser => quser.update({
-            is_active: 1,
-          }));
+          }).then(quser => {
+            const bizTeamEmail = phpSerialize.serialize({
+              settings: {
+                subject: 'Consultant Accepted Terms And Conditions',
+                to: 'partner@quezx.com',
+                from: ['notifications@quezx.com', 'QuezX.com'],
+                domain: 'Quezx.com',
+                emailFormat: 'html',
+                template: ['ConsultantCreation'],
+              },
+              vars: {
+                consultant: [{ User: quser.toJSON() }],
+              },
+            });
+            const etask = {
+              jobType: 'Email',
+              group: 'email',
+              data: bizTeamEmail,
+            };
+
+            QueuedTask.create(etask)
+              .catch(qErr => logger.error(`error queue email: user signup: ${req.user.id}`,
+                qErr, bizTeamEmail));
+
+            return quser.update({
+              is_active: 1,
+            });
+          });
         });
       });
     return res.json(user);
@@ -312,7 +338,6 @@ export function actionCounts(req, res) {
       ];
       items.map(item => {
         countData.map(wItem => {
-          console.log(item.id, wItem.id, typeof item.id, typeof wItem.id)
           if (item.id === wItem.id) {
             item.count = wItem.count;
           }
