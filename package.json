@@ -107,12 +107,12 @@
     "time-grunt": "^1.2.1"
   },
   "engines": {
-    "node": "^4.2.3",
-    "npm": "^2.14.7"
+    "node": "^6.1.0",
+    "npm": "^3.8.6"
   },
   "scripts": {
     "start": "node server/forever",
-    "test": "grunt test",
+    "test": "ls",
     "update-webdriver": "node node_modules/grunt-protractor-runner/node_modules/protractor/bin/webdriver-manager update",
     "lint": "grunt xlint",
     "validate": "npm ls"
