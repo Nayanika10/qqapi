@@ -724,7 +724,6 @@ export function company(req, res) {
         filetype: client.Logo.mime
       };
       client.emp_range = emp_range;
-      img = logo;
       delete client.Logo;
       delete client.min_emp;
       delete client.max_emp;

@@ -329,7 +329,7 @@ module.exports = function QueuedTaskModel(sequelize, DataTypes) {
        * Adds email for Applicant comment to queue
        * @param  {Object}   options                 Email config and data
        * @param  {String}   options.comment         Comment text
-       * @param  {String[]} options.emails          Emails to send email to
+       * @param  {String}   options.email           Email to send email to
        * @param  {Object}   options.applicant       Applicant details
        * @param  {Number}   options.applicant.id    Applicant id
        * @param  {String}   options.applicant.name  Applicant name
@@ -341,10 +341,9 @@ module.exports = function QueuedTaskModel(sequelize, DataTypes) {
       applicantCommentNotify(options) {
         const data = php.serialize({
           settings: {
-            subject: `[QuezX Hire] Comment by - ${options.job.client} - ` +
+            subject: `[QuezX Partner] Comment by - ${options.job.client} - ` +
             `${options.job.role} - ${options.applicant.name}`,
-            to: options.emails[0],
-            cc: options.emails[1],
+            to: options.email,
             bcc: 'client.relations@quetzal.in',
             from: ['client-blank-comments@quezx.com', 'QuezX.com'],
             domain: 'Quezx.com',

@@ -324,7 +324,7 @@ export function update(req, res) {
 
           const folder = `${path.join(config.QDMS_PATH,
               'Applicants', rangeFolder, applicantId.toString())}/`;
-          const resumePathToUpdateInDB = `$folder}${newID}.${fileExt}`;
+          const resumePathToUpdateInDB = `${folder}${newID}.${fileExt}`;
           const tempFilePath = files.fileUpload.path;
           return db.Applicant.uploadFile(db, tempFilePath, folder, newID, fileExt, applicantId)
             .then(() => {

@@ -194,7 +194,7 @@ export function create(req, res) {
             applicant: { id: c.applicant_id, name: j.Applicant.name },
             job: { role: j.Job.role, client: user
               .find(u => u.id === j.Job.user_id).Client.name },
-            emails: user.map(u => u.Client.EngagementManager.email_id),
+            email: _.find(user, u => (u.id === j.Applicant.user_id)).Client.EngagementManager.email_id
           });
         });
       })
