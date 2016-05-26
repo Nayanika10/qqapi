@@ -159,43 +159,90 @@ export function bulkResumeDownload(req, res) {
 
 // Gets a single Applicant from the DB
 export function show(req, res) {
-  const fl = req.query.fl || [
-    'name', 'id', 'applicant_score', 'state_name', 'state_id',
-    'email', 'total_exp', 'skills', 'edu_degree', 'exp_salary',
-    'exp_designation', 'exp_employer', 'email', 'notice_period',
-    'mobile', 'exp_location', 'expected_ctc',
-  ].join(',');
 
-  //  const states = BUCKETS[STAKEHOLDERS[req.user.group_id]].ALL;
+  switch(req.user.group_id){
+    case BUCKETS.GROUPS.INTERNAL_TEAM:
+    {
+      const fl = req.query.fl || [
+          'name', 'id', 'applicant_score', 'state_name', 'state_id',
+          'email', 'total_exp', 'skills', 'edu_degree', 'exp_salary',
+          'exp_designation', 'exp_employer', 'email', 'notice_period',
+          'mobile', 'exp_location', 'expected_ctc',
+        ].join(',');
 
-  const solrQuery = Solr.createQuery()
-    .q('type_s:applicant')
-    .matchFilter('id', `${req.params.id} AND owner_id:${req.user.id}`)
-    .fl(fl);
+      //  const states = BUCKETS[STAKEHOLDERS[req.user.group_id]].ALL;
 
-  Solr.get('select', solrQuery, (err, result) => {
-    if (err) return handleError(res, 500, err);
-    if (result.response.docs.length === 0) {
-      return handleError(res, 404, new Error('Applicant Not Found'));
+      const solrQuery = Solr.createQuery()
+        .q('type_s:applicant')
+        .matchFilter('id', `${req.params.id}`)
+        .fl(fl);
+
+      Solr.get('select', solrQuery, (err, result) => {
+        if (err) return handleError(res, 500, err);
+        if (result.response.docs.length === 0) {
+          return handleError(res, 404, new Error('Applicant Not Found'));
+        }
+
+        if (!~fl.indexOf('_root_')) return res.json(result.response.docs[0]);
+        const applicant = result.response.docs[0];
+        const solrInnerQuery = db.Solr
+          .createQuery()
+          .q(`id:${applicant._root_} AND type_s:job`)
+          .fl(['role', 'id', 'client_name'])
+          .rows(1);
+
+        // Get job to attach to results
+        return db.Solr.get('select', solrInnerQuery, (jobErr, jobResult) => {
+          if (jobErr) return handleError(res, 500, jobErr);
+          const job = jobResult.response.docs[0];
+          if (!job) return res.json(applicant);
+          applicant._root_ = job;
+          return res.json(applicant);
+        });
+      });
+      break;
     }
+          case BUCKETS.GROUPS.CONSULTANTS: {
+            const fl = req.query.fl || [
+                'name', 'id', 'applicant_score', 'state_name', 'state_id',
+                'email', 'total_exp', 'skills', 'edu_degree', 'exp_salary',
+                'exp_designation', 'exp_employer', 'email', 'notice_period',
+                'mobile', 'exp_location', 'expected_ctc',
+              ].join(',');
 
-    if (!~fl.indexOf('_root_')) return res.json(result.response.docs[0]);
-    const applicant = result.response.docs[0];
-    const solrInnerQuery = db.Solr
-      .createQuery()
-      .q(`id:${applicant._root_} AND type_s:job`)
-      .fl(['role', 'id', 'client_name'])
-      .rows(1);
+            //  const states = BUCKETS[STAKEHOLDERS[req.user.group_id]].ALL;
 
-    // Get job to attach to results
-    return db.Solr.get('select', solrInnerQuery, (jobErr, jobResult) => {
-      if (jobErr) return handleError(res, 500, jobErr);
-      const job = jobResult.response.docs[0];
-      if (!job) return res.json(applicant);
-      applicant._root_ = job;
-      return res.json(applicant);
-    });
-  });
+            const solrQuery = Solr.createQuery()
+              .q('type_s:applicant')
+              .matchFilter('id', `${req.params.id} AND owner_id:${req.user.id}`)
+              .fl(fl);
+
+            Solr.get('select', solrQuery, (err, result) => {
+              if (err) return handleError(res, 500, err);
+              if (result.response.docs.length === 0) {
+                return handleError(res, 404, new Error('Applicant Not Found'));
+              }
+
+              if (!~fl.indexOf('_root_')) return res.json(result.response.docs[0]);
+              const applicant = result.response.docs[0];
+              const solrInnerQuery = db.Solr
+                .createQuery()
+                .q(`id:${applicant._root_} AND type_s:job`)
+                .fl(['role', 'id', 'client_name'])
+                .rows(1);
+
+              // Get job to attach to results
+              return db.Solr.get('select', solrInnerQuery, (jobErr, jobResult) => {
+                if (jobErr) return handleError(res, 500, jobErr);
+                const job = jobResult.response.docs[0];
+                if (!job) return res.json(applicant);
+                applicant._root_ = job;
+                return res.json(applicant);
+              });
+            });
+          }
+  }
+
 }
 
 export function getResume(req, res) {
