@@ -341,7 +341,7 @@ module.exports = function QueuedTaskModel(sequelize, DataTypes) {
       applicantCommentNotify(options) {
         const data = php.serialize({
           settings: {
-            subject: `[QuezX Partner] Comment by - ${options.job.client} - ` +
+            subject: `[QuezX Partner] Comment by - ${options.applicant.client} - ` +
             `${options.job.role} - ${options.applicant.name}`,
             to: options.email,
             bcc: 'client.relations@quetzal.in',

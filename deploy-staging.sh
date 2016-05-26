@@ -1,4 +1,5 @@
 #! /bin/bash
+COMMIT_MSG=$(git log --format=oneline -n 1 $CIRCLE_SHA1)
 echo "##############################################################  username of last commit "
 echo $CIRCLE_USERNAME
 if [[ $CIRCLE_USERNAME = "quezx" ]] ;
@@ -106,7 +107,6 @@ echo "##############################################################  Listing fi
 ls
 
 echo "##############################################################  Commiting..."
-COMMIT_MSG=$(git log --format=oneline -n 1 $CIRCLE_SHA1)
 git commit -m "$COMMIT_MSG"
 
 echo "##############################################################  git status after commit"
@@ -117,6 +117,9 @@ ls
 
 echo "##############################################################  Started deploying"
 git push origin staging
+
+echo "Notifing Slack"
+curl -X POST --data-urlencode "payload={\"text\": \"qqapi:$COMMIT_MSG - deployed to staging\"}" https://hooks.slack.com/services/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
 
 echo "##############################################################  Deployed Successfully!"
 exit 0

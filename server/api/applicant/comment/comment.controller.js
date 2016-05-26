@@ -191,10 +191,16 @@ export function create(req, res) {
         .then(user => {
           QueuedTask.applicantCommentNotify({
             comment: c.comment,
-            applicant: { id: c.applicant_id, name: j.Applicant.name },
-            job: { role: j.Job.role, client: user
-              .find(u => u.id === j.Job.user_id).Client.name },
-            email: _.find(user, u => (u.id === j.Applicant.user_id)).Client.EngagementManager.email_id
+            applicant: {
+              id: c.applicant_id,
+              name: j.Applicant.name,
+              client: user.find(u => u.id === j.Applicant.user_id).Client.name,
+            },
+            job: {
+              role: j.Job.role,
+              client: user.find(u => u.id === j.Job.user_id).Client.name,
+            },
+            email: _.find(user, u => (u.id === j.Applicant.user_id)).Client.EngagementManager.email_id,
           });
         });
       })

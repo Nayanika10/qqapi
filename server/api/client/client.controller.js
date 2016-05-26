@@ -444,9 +444,9 @@ export function ratingAndRatios(req, res) {
 
   return Promise.all([screeningDataPromise, screeningAllDataPromise,
       shortlistingDataPromise, shortlistingAllDataPromise])
-    .then(promiseReturns => {
-      const screeningRatio = Math.round((promiseReturns[0] / promiseReturns[1]) * 100);
-      const shortlistingRatio = Math.round((promiseReturns[2] / promiseReturns[3]) * 100);
+    .spread((screeningData, screeningAllData, shortlistingData, shortlistingAllData) => {
+      const screeningRatio = (Math.round((screeningData / screeningAllData) * 100)) || 100;
+      const shortlistingRatio = (Math.round((shortlistingData / shortlistingAllData) * 100)) || 100;
       const rating = (screeningRatio + shortlistingRatio) / 200 * 5;
       res.json({ screeningRatio, shortlistingRatio, rating });
     })
@@ -482,7 +482,7 @@ export function forActions(req, res) {
     .then(allApplicants => {
       const allApplicantsTemp = allApplicants;
       const _applicantIds = _.map(allApplicantsTemp, 'id');
-
+      if(!_applicantIds.length) return res.status(204).json([])
       const solrQuery = Solr.createQuery()
         .q('type_s:applicant')
         .fl('id,name,mobile,email,state_name,exp_designation,exp_employer,_root_')
